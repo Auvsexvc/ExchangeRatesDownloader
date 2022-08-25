@@ -1,5 +1,6 @@
 ﻿using ExchangeRatesDownloaderApp.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 
 namespace ExchangeRatesDownloaderApp.Controllers
 {
@@ -14,11 +15,24 @@ namespace ExchangeRatesDownloaderApp.Controllers
 
         public async Task<IActionResult> Index()
         {
-            await _homeService.ImportExchangeRatesAsync();
+            ViewBag.ApiState = "No errors found.";
+            ViewBag.DbState = "No errors found.";
+            try
+            {
+                await _homeService.ImportExchangeRatesAsync();
+            }
+            catch (SqlException ex)
+            {
+                ViewBag.DBState = $"{ex.Message} - Showing the most recent exchange rates from external API";
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ApiState = $"{ex.Message} - Showing the most recent exchange rates stored in database";
+            }
 
             var data = await _homeService.GetExchangeRatesAsync();
 
-            return View(data.OrderBy(x=>x.Name));
+            return View(data);
         }
     }
 }

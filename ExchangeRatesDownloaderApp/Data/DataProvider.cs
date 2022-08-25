@@ -22,6 +22,7 @@ namespace ExchangeRatesDownloaderApp.Data
                     response.EnsureSuccessStatusCode();
 
                     var content = await response.Content.ReadAsStringAsync();
+
                     tableList.Add(JsonConvert.DeserializeObject<List<ExchangeTable>>(content)[0]);
                 }
                 catch (Exception exception)

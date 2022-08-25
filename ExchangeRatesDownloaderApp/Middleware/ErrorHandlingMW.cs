@@ -19,24 +19,24 @@ namespace ExchangeRatesDownloaderApp.Middleware
             }
             catch (NotFoundException notFoundException)
             {
-                _logger.LogError(notFoundException.Message);
+                _logger.LogError("{notFoundException.Message}", notFoundException);
 
                 context.Response.StatusCode = 404;
                 await context.Response.WriteAsync(notFoundException.Message);
             }
             catch (BadRequestException badRequestException)
             {
-                _logger.LogError(badRequestException.Message);
+                _logger.LogError("{badRequestException.Message}", badRequestException);
 
                 context.Response.StatusCode = 400;
                 await context.Response.WriteAsync(badRequestException.Message);
             }
             catch (Exception e)
             {
-                _logger.LogError(e, e.Message);
+                _logger.LogError("{e.Message}", e);
 
                 context.Response.StatusCode = 500;
-                await context.Response.WriteAsync("Something went wrong");
+                await context.Response.WriteAsync(e.Message);
             }
         }
     }

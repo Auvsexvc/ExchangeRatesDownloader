@@ -1,9 +1,19 @@
 ﻿@model IEnumerable<ExchangeRateVM>
 
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "NBP Exchange Rates";
 }
 
+<div class="row">
+    <div class="col-md-10 offset-md-2">
+        <div class="row">
+            <h6 style="float:right;">APIState: @ViewBag.ApiState</h6>
+        </div>
+        <div class="row">
+            <h6 style="float:right;">DBState: @ViewBag.DbState</h6>
+        </div>
+    </div>
+</div>
 <div class="row">
     <div class="col-md-10 offset-md-2">
         <table id="ExchangeRates" class="table tablesorter">
@@ -61,7 +71,7 @@
         </table>
     </div>
 </div>
-@await Html.PartialAsync("_AddButton", "Home")
+@await Html.PartialAsync("_ReloadButton", "Home")
 
 @section scripts {
     <script type="text/javascript">
@@ -72,8 +82,6 @@
                     return false;
                 },
                 format: function (s) {
-                    //alert(s.replace('$', '').replace('£', '').replace(/,/g, ''));
-                    //return s.replace('$', '').replace('£', '').replace(/,/g, '');
                 },
                 type: 'numeric'
             });
