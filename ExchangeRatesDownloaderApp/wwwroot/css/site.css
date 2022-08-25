@@ -35,7 +35,6 @@ table.tablesorter thead tr th, table.tablesorter tfoot tr th {
     border: 1px solid #FFF;
     font-size: 8pt;
     padding: 4px;
-    min-width: 85px;
     vertical-align: middle;
     padding-bottom: 12px;
 }

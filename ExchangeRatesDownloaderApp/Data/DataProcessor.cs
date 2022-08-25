@@ -1,42 +1,68 @@
 ﻿using ExchangeRatesDownloaderApp.Interfaces;
 using ExchangeRatesDownloaderApp.Models;
+using System.Security.AccessControl;
 
 namespace ExchangeRatesDownloaderApp.Data
 {
     public class DataProcessor : IDataProcessor
     {
         private readonly IDataProvider _dataProvider;
+        private readonly IDataWriter _dataWriter;
+        private readonly IDataReader _dataReader;
         private readonly string _nbpTablesApiBaseUrl;
+        private readonly string[] _nbpTables;
+        private readonly string _outputFormat;
 
-        public DataProcessor(IDataProvider dataProvider, IConfiguration configuration)
+        public DataProcessor(IDataProvider dataProvider, IConfiguration configuration, IDataWriter dataWriter, IDataReader dataReader)
         {
             _dataProvider = dataProvider;
+            _dataWriter = dataWriter;
+            _dataReader = dataReader;
             _nbpTablesApiBaseUrl = configuration["NbpApi:TablesBaseUrl"];
+            _nbpTables = configuration.GetSection("NbpApi:Tables").Get<string[]>();
+            _outputFormat = configuration["NbpApi:OutputFormat"];
         }
 
-        public async Task<IEnumerable<ExchangeRate>> Process()
+        private async Task<IEnumerable<ExchangeTable>> GetDataAsync()
         {
-            var objA = await _dataProvider.GetTableAsync(_nbpTablesApiBaseUrl + "a?format=json");
-            var objB = await _dataProvider.GetTableAsync(_nbpTablesApiBaseUrl + "b?format=json");
-            var objC = await _dataProvider.GetTableAsync(_nbpTablesApiBaseUrl + "c?format=json");
+            return await _dataProvider.DownloadDataAsync(_nbpTablesApiBaseUrl, _nbpTables, _outputFormat);
+        }
 
-            List<ExchangeRate> results = new();
+        public async Task WriteToDbAsync()
+        {
+            var data = await GetDataAsync();
+            await _dataWriter.SaveToDb(data);
+        }
 
-            foreach (var table in objA.Concat(objB))
+        public async Task<IEnumerable<ExchangeRateVM>> ReadFromDbAsync()
+        {
+            return await _dataReader.GetAllRatesAsync();
+        }
+
+        public async Task<IEnumerable<ExchangeRateVM>> ReadFromProviderAsync()
+        {
+            var data = await GetDataAsync();
+
+            var objC = data.Where(t => string.Equals(t.Type, "C", StringComparison.CurrentCultureIgnoreCase)).ToList();
+
+            List<ExchangeRateVM> results = new();
+
+            foreach (var table in data.Where(t => !string.Equals(t.Type, "c", StringComparison.CurrentCultureIgnoreCase)))
             {
                 foreach (var rate in table.Rates)
                 {
-                    ExchangeRate exchangeRate = new()
+                    ExchangeRateVM exchangeRate = new()
                     {
                         Name = rate.Name,
                         Code = rate.Code,
-                        Bid = objC.First().Rates.Any(r => r.Code == rate.Code) ? objC.First().Rates.Where(r => r.Code == rate.Code).Select(r => r.Bid).First() : rate.Bid,
-                        Ask = objC.First().Rates.Any(r => r.Code == rate.Code) ? objC.First().Rates.Where(r => r.Code == rate.Code).Select(r => r.Ask).First() : rate.Ask,
+                        Bid = objC[0].Rates.Any(r => r.Code == rate.Code) ? objC[0].Rates.Where(r => r.Code == rate.Code).Select(r => r.Bid).First() : rate.Bid,
+                        Ask = objC[0].Rates.Any(r => r.Code == rate.Code) ? objC[0].Rates.Where(r => r.Code == rate.Code).Select(r => r.Ask).First() : rate.Ask,
                         Mid = rate.Mid,
-                        No = objC.First().Rates.Any(r => r.Code == rate.Code) ? String.Join("\n", table.No, objC.First().No) : table.No,
-                        Type = objC.First().Rates.Any(r => r.Code == rate.Code) ? String.Join("\n", table.Type, objC.First().Type) : table.Type,
-                        TradingDate = objC.First().Rates.Any(r => r.Code == rate.Code) ? objC.First().TradingDate : table.TradingDate,
-                        EffectiveDate = table.EffectiveDate
+                        No = objC[0].Rates.Any(r => r.Code == rate.Code) ? String.Join("\n", table.No, objC[0].No) : table.No,
+                        Type = objC[0].Rates.Any(r => r.Code == rate.Code) ? String.Join("\n", table.Type, objC[0].Type) : table.Type,
+                        TradingDate = objC[0].Rates.Any(r => r.Code == rate.Code) ? objC[0].TradingDate : table.TradingDate,
+                        EffectiveDate = table.EffectiveDate,
+                        EffectiveDateBidAsk = objC[0].Rates.Any(r => r.Code == rate.Code) ? objC[0].EffectiveDate : null
                     };
                     results.Add(exchangeRate);
                 }

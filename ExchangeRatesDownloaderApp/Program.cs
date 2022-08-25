@@ -17,6 +17,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<ErrorHandlingMiddleware>();
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IDataProvider, DataProvider>();
+builder.Services.AddScoped<IDataWriter, DataWriter>();
+builder.Services.AddScoped<IDataReader, DataReader>();
 builder.Services.AddScoped<IDataProcessor, DataProcessor>();
 builder.Services.AddScoped<IHomeService, HomeService>();
 
@@ -29,7 +31,7 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-app.UseMiddleware<ErrorHandlingMiddleware>();
+//app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

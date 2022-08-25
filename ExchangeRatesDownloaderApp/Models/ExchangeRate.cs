@@ -1,34 +1,30 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ExchangeRatesDownloaderApp.Models
 {
     public class ExchangeRate
     {
-        [Display(Name = "Numer tabeli")]
-        public string No { get; set; } = string.Empty;
+        public int Id { get; set; }
 
-        [Display(Name = "Typ tabeli")]
-        public string Type { get; set; } = string.Empty;
-
-        [Display(Name = "data notowania")]
-        public DateTime? TradingDate { get; set; }
-
-        [Display(Name = "data publikacji")]
-        public DateTime EffectiveDate { get; set; }
-
-        [Display(Name = "nazwa waluty")]
+        [JsonProperty("currency")]
         public string Name { get; set; } = string.Empty;
 
-        [Display(Name = "kod waluty")]
+        [JsonProperty("code")]
         public string Code { get; set; } = string.Empty;
 
-        [Display(Name = "przeliczony kurs kupna waluty")]
+        [JsonProperty("bid")]
         public decimal? Bid { get; set; }
 
-        [Display(Name = "przeliczony kurs sprzedaży waluty")]
+        [JsonProperty("ask")]
         public decimal? Ask { get; set; }
 
-        [Display(Name = "przeliczony kurs średni waluty")]
+        [JsonProperty("mid")]
         public decimal Mid { get; set; }
+
+        public int TableId { get; set; }
+
+        [ForeignKey("TableId")]
+        public ExchangeTable ExchangeTable { get; set; }
     }
 }

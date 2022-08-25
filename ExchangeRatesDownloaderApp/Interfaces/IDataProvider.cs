@@ -1,9 +1,9 @@
-﻿using ExchangeRatesDownloaderApp.Data;
+﻿using ExchangeRatesDownloaderApp.Models;
 
 namespace ExchangeRatesDownloaderApp.Interfaces
 {
     public interface IDataProvider
     {
-        Task<IEnumerable<ExchangeRatesTable>> GetTableAsync(string uri);
+        Task<IEnumerable<ExchangeTable>> DownloadDataAsync(string baseUri, string[] tables, string outputFormat);
     }
 }

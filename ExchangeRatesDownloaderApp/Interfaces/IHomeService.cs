@@ -4,6 +4,8 @@ namespace ExchangeRatesDownloaderApp.Interfaces
 {
     public interface IHomeService
     {
-        Task<IEnumerable<ExchangeRate>> ImportCurrentExchangesRates();
+        Task<IEnumerable<ExchangeRateVM>> GetExchangeRatesAsync();
+
+        Task ImportExchangeRatesAsync();
     }
 }

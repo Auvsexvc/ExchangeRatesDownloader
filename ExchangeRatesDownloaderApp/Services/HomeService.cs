@@ -12,11 +12,15 @@ namespace ExchangeRatesDownloaderApp.Services
             _dataProcessor = dataProcessor;
         }
 
-        public async Task<IEnumerable<ExchangeRate>> ImportCurrentExchangesRates()
+        public async Task<IEnumerable<ExchangeRateVM>> GetExchangeRatesAsync()
         {
-            var result = await _dataProcessor.Process();
+            return await _dataProcessor.ReadFromProviderAsync();
+            //return await _dataProcessor.ReadFromDbAsync();
+        }
 
-            return result;
+        public async Task ImportExchangeRatesAsync()
+        {
+            await _dataProcessor.WriteToDbAsync();
         }
     }
 }
