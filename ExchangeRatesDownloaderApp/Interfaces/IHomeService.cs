@@ -1,4 +1,4 @@
-﻿using ExchangeRatesDownloaderApp.Data;
+﻿using ExchangeRatesDownloaderApp.Models;
 
 namespace ExchangeRatesDownloaderApp.Interfaces
 {

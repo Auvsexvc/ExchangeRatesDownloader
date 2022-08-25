@@ -1,18 +1,71 @@
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+}
+
+#ExchangeRates td.nowrap {
+    white-space: nowrap;
+}
+
+table.tablesorter {
+    font-family: arial;
+    background-color: #CDCDCD;
+    margin: 10px 0pt 15px;
+    font-size: 8pt;
+    width: 100%;
+    text-align: left;
+}
+
+table.tablesorter thead tr th, table.tablesorter tfoot tr th {
+    background-color: #ffffffad;
+    border: 1px solid #FFF;
+    font-size: 8pt;
+    padding: 4px;
+    min-width: 85px;
+    vertical-align: middle;
+    padding-bottom: 12px;
+}
+
+table.tablesorter thead tr .header {
+    background-image: url(../bg.gif);
+    background-repeat: no-repeat;
+    background-position: bottom right;
+    cursor: pointer;
+}
+
+table.tablesorter tbody td {
+    color: #3D3D3D;
+    padding: 4px;
+    background-color: #FFF;
+    vertical-align: top;
+}
+
+table.tablesorter tbody tr.odd td {
+    background-color: #F0F0F6;
+}
+
+table.tablesorter thead tr .headerSortUp {
+    background-image: url(../asc.gif);
+}
+
+table.tablesorter thead tr .headerSortDown {
+    background-image: url(../desc.gif);
+}
+
+table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
+    background-color: #a3d55c;
 }

@@ -1,12 +1,21 @@
 using ExchangeRatesDownloaderApp.Data;
 using ExchangeRatesDownloaderApp.Interfaces;
+using ExchangeRatesDownloaderApp.Middleware;
 using ExchangeRatesDownloaderApp.Services;
+using Microsoft.EntityFrameworkCore;
+using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.ClearProviders();
+builder.Logging.SetMinimumLevel(LogLevel.Trace);
+builder.Host.UseNLog();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddScoped<ErrorHandlingMiddleware>();
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IDataProvider, DataProvider>();
 builder.Services.AddScoped<IDataProcessor, DataProcessor>();
 builder.Services.AddScoped<IHomeService, HomeService>();
@@ -20,6 +29,7 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

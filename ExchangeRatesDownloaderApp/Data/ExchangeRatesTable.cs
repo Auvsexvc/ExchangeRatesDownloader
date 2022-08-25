@@ -6,24 +6,19 @@ namespace ExchangeRatesDownloaderApp.Data
 {
     public class ExchangeRatesTable
     {
-        [Display(Name = "Numer tabeli")]
         [JsonProperty("no")]
-        public string No { get; set; }
+        public string No { get; set; } = String.Empty;
 
-        [Display(Name = "Typ tabeli")]
         [JsonProperty("table")]
-        public string Type { get; set; }
+        public string Type { get; set; } = String.Empty;
 
-        [Display(Name = "data notowania")]
         [JsonProperty("tradingDate")]
         public DateTime? TradingDate { get; set; }
 
-        [Display(Name = "data publikacji")]
         [JsonProperty("effectiveDate")]
         public DateTime EffectiveDate { get; set; }
 
-        [Display(Name = " lista kursów poszczególnych walut w tabeli")]
         [JsonProperty("rates")]
-        public List<Rate> Rates { get; set; }
+        public List<Rate> Rates { get; set; } = new List<Rate>();
     }
 }

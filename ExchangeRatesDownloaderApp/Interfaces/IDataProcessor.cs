@@ -1,4 +1,6 @@
-﻿namespace ExchangeRatesDownloaderApp.Data
+﻿using ExchangeRatesDownloaderApp.Models;
+
+namespace ExchangeRatesDownloaderApp.Interfaces
 {
     public interface IDataProcessor
     {

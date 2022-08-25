@@ -1,23 +1,26 @@
 ﻿using ExchangeRatesDownloaderApp.Interfaces;
+using ExchangeRatesDownloaderApp.Models;
 
 namespace ExchangeRatesDownloaderApp.Data
 {
     public class DataProcessor : IDataProcessor
     {
         private readonly IDataProvider _dataProvider;
+        private readonly string _nbpTablesApiBaseUrl;
 
-        public DataProcessor(IDataProvider dataProvider)
+        public DataProcessor(IDataProvider dataProvider, IConfiguration configuration)
         {
             _dataProvider = dataProvider;
+            _nbpTablesApiBaseUrl = configuration["NbpApi:TablesBaseUrl"];
         }
 
         public async Task<IEnumerable<ExchangeRate>> Process()
         {
-            var objA = await _dataProvider.GetTableAsync("http://api.nbp.pl/api/exchangerates/tables/a?format=json");
-            var objB = await _dataProvider.GetTableAsync("http://api.nbp.pl/api/exchangerates/tables/b?format=json");
-            var objC = await _dataProvider.GetTableAsync("http://api.nbp.pl/api/exchangerates/tables/c?format=json");
+            var objA = await _dataProvider.GetTableAsync(_nbpTablesApiBaseUrl + "a?format=json");
+            var objB = await _dataProvider.GetTableAsync(_nbpTablesApiBaseUrl + "b?format=json");
+            var objC = await _dataProvider.GetTableAsync(_nbpTablesApiBaseUrl + "c?format=json");
 
-            List<ExchangeRate> results = new List<ExchangeRate>();
+            List<ExchangeRate> results = new();
 
             foreach (var table in objA.Concat(objB))
             {
@@ -25,15 +28,14 @@ namespace ExchangeRatesDownloaderApp.Data
                 {
                     ExchangeRate exchangeRate = new()
                     {
-                        Id = Guid.NewGuid(),
                         Name = rate.Name,
                         Code = rate.Code,
                         Bid = objC.First().Rates.Any(r => r.Code == rate.Code) ? objC.First().Rates.Where(r => r.Code == rate.Code).Select(r => r.Bid).First() : rate.Bid,
                         Ask = objC.First().Rates.Any(r => r.Code == rate.Code) ? objC.First().Rates.Where(r => r.Code == rate.Code).Select(r => r.Ask).First() : rate.Ask,
                         Mid = rate.Mid,
-                        No = table.No,
-                        Type = table.Type,
-                        TradingDate = table.TradingDate,
+                        No = objC.First().Rates.Any(r => r.Code == rate.Code) ? String.Join("\n", table.No, objC.First().No) : table.No,
+                        Type = objC.First().Rates.Any(r => r.Code == rate.Code) ? String.Join("\n", table.Type, objC.First().Type) : table.Type,
+                        TradingDate = objC.First().Rates.Any(r => r.Code == rate.Code) ? objC.First().TradingDate : table.TradingDate,
                         EffectiveDate = table.EffectiveDate
                     };
                     results.Add(exchangeRate);

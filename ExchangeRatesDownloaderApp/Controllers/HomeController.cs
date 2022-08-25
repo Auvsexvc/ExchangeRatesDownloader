@@ -14,9 +14,10 @@ namespace ExchangeRatesDownloaderApp.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var downloadedData = await _homeService.ImportCurrentExchangesRates();
+            var data = await _homeService.ImportCurrentExchangesRates();
 
-            return View(downloadedData);
+
+            return View(data.OrderBy(x=>x.Name));
         }
     }
 }

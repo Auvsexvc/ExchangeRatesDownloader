@@ -1,5 +1,5 @@
-﻿using ExchangeRatesDownloaderApp.Data;
-using ExchangeRatesDownloaderApp.Interfaces;
+﻿using ExchangeRatesDownloaderApp.Interfaces;
+using ExchangeRatesDownloaderApp.Models;
 
 namespace ExchangeRatesDownloaderApp.Services
 {
