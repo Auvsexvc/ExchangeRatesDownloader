@@ -9,7 +9,8 @@ namespace ExchangeRatesDownloaderApp.Data
         private readonly IDataWriter _dataWriter;
         private readonly IDataReader _dataReader;
         private readonly string _nbpTablesApiBaseUrl;
-        private readonly string[] _nbpTables;
+        private readonly string[] _nbpTablesMid;
+        private readonly string[] _nbpTablesBidAsk;
         private readonly string _outputFormat;
 
         public DataProcessor(IDataProvider dataProvider, IConfiguration configuration, IDataWriter dataWriter, IDataReader dataReader)
@@ -18,7 +19,8 @@ namespace ExchangeRatesDownloaderApp.Data
             _dataWriter = dataWriter;
             _dataReader = dataReader;
             _nbpTablesApiBaseUrl = configuration["NbpApi:TablesBaseUrl"];
-            _nbpTables = configuration.GetSection("NbpApi:Tables").Get<string[]>();
+            _nbpTablesMid = configuration.GetSection("NbpApi:Tables:Mid").Get<string[]>();
+            _nbpTablesBidAsk = configuration.GetSection("NbpApi:Tables:BidAsk").Get<string[]>();
             _outputFormat = configuration["NbpApi:OutputFormat"];
         }
 
@@ -41,26 +43,38 @@ namespace ExchangeRatesDownloaderApp.Data
                 data = await ReadFromProviderAsync();
             }
 
-            var objC = data.Where(t => string.Equals(t.Type, "C", StringComparison.CurrentCultureIgnoreCase)).ToList();
+            var objC = data.Where(t => _nbpTablesBidAsk.Select(x => x.ToLower()).Contains(t.Type.ToLower())).ToList();
 
             List<ExchangeRateVM> results = new();
 
-            foreach (var table in data.Where(t => !string.Equals(t.Type, "c", StringComparison.CurrentCultureIgnoreCase)))
+            foreach (var table in data.Where(t => _nbpTablesMid.Select(x=>x.ToLower()).Contains(t.Type.ToLower())))
             {
                 foreach (var rate in table.Rates)
                 {
+                    var isCurrencyHavingBidAsk = false;
+                    var idx = 0;
+                    for (int i = 0; i < objC.Count; i++)
+                    {
+                        isCurrencyHavingBidAsk = objC[i].Rates.Any(r => r.Code == rate.Code);
+                        if (isCurrencyHavingBidAsk)
+                        {
+                            idx = i;
+                            break;
+                        }
+                    }
+
                     ExchangeRateVM exchangeRate = new()
                     {
                         Name = rate.Name,
                         Code = rate.Code,
-                        Bid = objC[0].Rates.Any(r => r.Code == rate.Code) ? objC[0].Rates.Where(r => r.Code == rate.Code).Select(r => r.Bid).First() : rate.Bid,
-                        Ask = objC[0].Rates.Any(r => r.Code == rate.Code) ? objC[0].Rates.Where(r => r.Code == rate.Code).Select(r => r.Ask).First() : rate.Ask,
+                        Bid = isCurrencyHavingBidAsk ? objC[idx].Rates.Where(r => r.Code == rate.Code).Select(r => r.Bid).First() : rate.Bid,
+                        Ask = isCurrencyHavingBidAsk ? objC[idx].Rates.Where(r => r.Code == rate.Code).Select(r => r.Ask).First() : rate.Ask,
                         Mid = rate.Mid,
-                        No = objC[0].Rates.Any(r => r.Code == rate.Code) ? String.Join("\n", table.No, objC[0].No) : table.No,
-                        Type = objC[0].Rates.Any(r => r.Code == rate.Code) ? String.Join("\n", table.Type, objC[0].Type) : table.Type,
-                        TradingDate = objC[0].Rates.Any(r => r.Code == rate.Code) ? objC[0].TradingDate : table.TradingDate,
+                        No = isCurrencyHavingBidAsk ? String.Join("\n", table.No, objC[idx].No) : table.No,
+                        Type = isCurrencyHavingBidAsk ? String.Join("\n", table.Type, objC[idx].Type) : table.Type,
+                        TradingDate = isCurrencyHavingBidAsk ? objC[idx].TradingDate : table.TradingDate,
                         EffectiveDate = table.EffectiveDate,
-                        EffectiveDateBidAsk = objC[0].Rates.Any(r => r.Code == rate.Code) ? objC[0].EffectiveDate : null
+                        EffectiveDateBidAsk = isCurrencyHavingBidAsk ? objC[idx].EffectiveDate : null
                     };
                     results.Add(exchangeRate);
                 }
@@ -80,7 +94,7 @@ namespace ExchangeRatesDownloaderApp.Data
 
         private async Task<IEnumerable<ExchangeTable>> GetDataAsync()
         {
-            return await _dataProvider.DownloadDataAsync(_nbpTablesApiBaseUrl, _nbpTables, _outputFormat);
+            return await _dataProvider.DownloadDataAsync(_nbpTablesApiBaseUrl, _nbpTablesMid.Concat(_nbpTablesBidAsk).ToArray(), _outputFormat);
         }
     }
 }

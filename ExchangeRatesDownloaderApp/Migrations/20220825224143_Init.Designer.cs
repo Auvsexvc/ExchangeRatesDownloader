@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExchangeRatesDownloaderApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20220825075851_init")]
-    partial class init
+    [Migration("20220825224143_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -24,34 +24,7 @@ namespace ExchangeRatesDownloaderApp.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("ExchangeRatesDownloaderApp.Data.ExchangeRatesTable", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<DateTime>("EffectiveDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("No")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("TradingDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ExchangeRatesTables");
-                });
-
-            modelBuilder.Entity("ExchangeRatesDownloaderApp.Data.Rate", b =>
+            modelBuilder.Entity("ExchangeRatesDownloaderApp.Models.ExchangeRate", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -86,21 +59,48 @@ namespace ExchangeRatesDownloaderApp.Migrations
 
                     b.HasIndex("TableId");
 
-                    b.ToTable("Rates");
+                    b.ToTable("ExchangeRates");
                 });
 
-            modelBuilder.Entity("ExchangeRatesDownloaderApp.Data.Rate", b =>
+            modelBuilder.Entity("ExchangeRatesDownloaderApp.Models.ExchangeTable", b =>
                 {
-                    b.HasOne("ExchangeRatesDownloaderApp.Data.ExchangeRatesTable", "ExchangeRatesTable")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<DateTime>("EffectiveDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("No")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("TradingDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ExchangeTables");
+                });
+
+            modelBuilder.Entity("ExchangeRatesDownloaderApp.Models.ExchangeRate", b =>
+                {
+                    b.HasOne("ExchangeRatesDownloaderApp.Models.ExchangeTable", "ExchangeTable")
                         .WithMany("Rates")
                         .HasForeignKey("TableId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("ExchangeRatesTable");
+                    b.Navigation("ExchangeTable");
                 });
 
-            modelBuilder.Entity("ExchangeRatesDownloaderApp.Data.ExchangeRatesTable", b =>
+            modelBuilder.Entity("ExchangeRatesDownloaderApp.Models.ExchangeTable", b =>
                 {
                     b.Navigation("Rates");
                 });
