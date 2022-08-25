@@ -1,6 +1,5 @@
 ﻿using ExchangeRatesDownloaderApp.Interfaces;
 using ExchangeRatesDownloaderApp.Models;
-using System.Security.AccessControl;
 
 namespace ExchangeRatesDownloaderApp.Data
 {
@@ -23,25 +22,24 @@ namespace ExchangeRatesDownloaderApp.Data
             _outputFormat = configuration["NbpApi:OutputFormat"];
         }
 
-        private async Task<IEnumerable<ExchangeTable>> GetDataAsync()
-        {
-            return await _dataProvider.DownloadDataAsync(_nbpTablesApiBaseUrl, _nbpTables, _outputFormat);
-        }
-
         public async Task WriteToDbAsync()
         {
             var data = await GetDataAsync();
             await _dataWriter.SaveToDb(data);
         }
 
-        public async Task<IEnumerable<ExchangeRateVM>> ReadFromDbAsync()
+        public async Task<IEnumerable<ExchangeRateVM>> PrepareViewModelAsync()
         {
-            return await _dataReader.GetAllRatesAsync();
-        }
+            List<ExchangeTable> data;
 
-        public async Task<IEnumerable<ExchangeRateVM>> ReadFromProviderAsync()
-        {
-            var data = await GetDataAsync();
+            if (await _dataReader.CanConnectToDb())
+            {
+                data = await ReadFromDbAsync();
+            }
+            else
+            {
+                data = await ReadFromProviderAsync();
+            }
 
             var objC = data.Where(t => string.Equals(t.Type, "C", StringComparison.CurrentCultureIgnoreCase)).ToList();
 
@@ -68,6 +66,21 @@ namespace ExchangeRatesDownloaderApp.Data
                 }
             }
             return results;
+        }
+
+        private async Task<List<ExchangeTable>> ReadFromDbAsync()
+        {
+            return await _dataReader.GetAllRatesAsync();
+        }
+
+        private async Task<List<ExchangeTable>> ReadFromProviderAsync()
+        {
+            return new List<ExchangeTable>(await GetDataAsync());
+        }
+
+        private async Task<IEnumerable<ExchangeTable>> GetDataAsync()
+        {
+            return await _dataProvider.DownloadDataAsync(_nbpTablesApiBaseUrl, _nbpTables, _outputFormat);
         }
     }
 }

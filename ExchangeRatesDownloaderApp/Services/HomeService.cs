@@ -14,8 +14,7 @@ namespace ExchangeRatesDownloaderApp.Services
 
         public async Task<IEnumerable<ExchangeRateVM>> GetExchangeRatesAsync()
         {
-            return await _dataProcessor.ReadFromProviderAsync();
-            //return await _dataProcessor.ReadFromDbAsync();
+            return await _dataProcessor.PrepareViewModelAsync();
         }
 
         public async Task ImportExchangeRatesAsync()

@@ -4,6 +4,7 @@ namespace ExchangeRatesDownloaderApp.Interfaces
 {
     public interface IDataReader
     {
-        Task<IEnumerable<ExchangeRateVM>> GetAllRatesAsync();
+        Task<List<ExchangeTable>> GetAllRatesAsync();
+        Task<bool> CanConnectToDb();
     }
 }

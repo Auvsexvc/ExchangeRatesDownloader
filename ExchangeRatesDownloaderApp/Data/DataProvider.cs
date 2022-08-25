@@ -7,7 +7,7 @@ namespace ExchangeRatesDownloaderApp.Data
 {
     public class DataProvider : IDataProvider
     {
-        public async Task<IEnumerable<ExchangeTable>> DownloadDataAsync(string baseUri, string[] tables, string outputFormat)
+        public async Task<List<ExchangeTable>> DownloadDataAsync(string baseUri, string[] tables, string outputFormat)
         {
             List<ExchangeTable> tableList = new();
 
