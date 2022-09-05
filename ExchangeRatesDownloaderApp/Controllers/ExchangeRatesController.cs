@@ -1,4 +1,5 @@
-﻿using ExchangeRatesDownloaderApp.Interfaces;
+﻿using ExchangeRatesDownloaderApp.Helper;
+using ExchangeRatesDownloaderApp.Interfaces;
 using ExchangeRatesDownloaderApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -16,29 +17,29 @@ namespace ExchangeRatesDownloaderApp.Controllers
 
         public async Task<IActionResult> Index()
         {
-            ViewBag.WriteToDb = "Db successfully updated";
-            ViewBag.ShowData = String.Empty;
             try
             {
                 await _homeService.ImportExchangeRatesAsync();
+                ViewBag.WriteToDb = ControllerMessages.MSG_GETDATASUCCESS;
             }
             catch (SqlException ex)
             {
-                ViewBag.WriteToDb = $"Writing to db failed. - {ex.Message}";
+                ViewBag.WriteToDb = String.Format(ControllerMessages.MSG_DBWRITESQLFAIL, ex.Message);
             }
             catch (HttpRequestException ex)
             {
-                ViewBag.WriteToDb = $"Writing to db failed. Reading data from remote API not possible - {ex.Message}";
+                ViewBag.WriteToDb = String.Format(ControllerMessages.MSG_DBWRITEHTTPFAIL, ex.Message);
             }
 
             var data = Enumerable.Empty<ExchangeRateVM>();
             try
             {
                 data = await _homeService.GetExchangeRatesAsync();
+                ViewBag.ShowData = String.Empty;
             }
             catch (Exception ex)
             {
-                ViewBag.ShowData = $"Data cannot be shown - {ex.Message}";
+                ViewBag.ShowData = String.Format(ControllerMessages.MSG_GETDATAFAIL, ex.Message);
             }
 
             return View(data);

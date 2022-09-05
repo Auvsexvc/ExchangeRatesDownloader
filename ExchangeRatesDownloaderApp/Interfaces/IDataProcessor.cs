@@ -4,8 +4,10 @@ namespace ExchangeRatesDownloaderApp.Interfaces
 {
     public interface IDataProcessor
     {
-        Task WriteToDbAsync();
+        Task<IEnumerable<ExchangeTable>> GetDataAsync();
 
         Task<IEnumerable<ExchangeRateVM>> PrepareViewModelAsync();
+
+        Task WriteToDbAsync(IEnumerable<ExchangeTable> exchangeTables);
     }
 }

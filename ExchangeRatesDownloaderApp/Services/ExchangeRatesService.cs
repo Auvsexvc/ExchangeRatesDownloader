@@ -21,7 +21,8 @@ namespace ExchangeRatesDownloaderApp.Services
         {
             try
             {
-                await _dataProcessor.WriteToDbAsync();
+                var data = await _dataProcessor.GetDataAsync();
+                await _dataProcessor.WriteToDbAsync(data);
             }
             catch (Exception)
             {

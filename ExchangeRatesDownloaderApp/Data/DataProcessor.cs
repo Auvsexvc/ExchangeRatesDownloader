@@ -24,10 +24,9 @@ namespace ExchangeRatesDownloaderApp.Data
             _outputFormat = configuration["NbpApi:OutputFormat"];
         }
 
-        public async Task WriteToDbAsync()
+        public async Task WriteToDbAsync(IEnumerable<ExchangeTable> exchangeTables)
         {
-            var data = await GetDataAsync();
-            await _dataWriter.SaveToDb(data);
+            await _dataWriter.SaveToDb(exchangeTables);
         }
 
         public async Task<IEnumerable<ExchangeRateVM>> PrepareViewModelAsync()
@@ -82,6 +81,11 @@ namespace ExchangeRatesDownloaderApp.Data
             return results;
         }
 
+        public async Task<IEnumerable<ExchangeTable>> GetDataAsync()
+        {
+            return await _dataProvider.DownloadDataAsync(_nbpTablesApiBaseUrl, _nbpTablesMid.Concat(_nbpTablesBidAsk).ToArray(), _outputFormat);
+        }
+
         private async Task<List<ExchangeTable>> ReadFromDbAsync()
         {
             return await _dataReader.GetAllRatesAsync();
@@ -90,11 +94,6 @@ namespace ExchangeRatesDownloaderApp.Data
         private async Task<List<ExchangeTable>> ReadFromProviderAsync()
         {
             return new List<ExchangeTable>(await GetDataAsync());
-        }
-
-        private async Task<IEnumerable<ExchangeTable>> GetDataAsync()
-        {
-            return await _dataProvider.DownloadDataAsync(_nbpTablesApiBaseUrl, _nbpTablesMid.Concat(_nbpTablesBidAsk).ToArray(), _outputFormat);
         }
     }
 }

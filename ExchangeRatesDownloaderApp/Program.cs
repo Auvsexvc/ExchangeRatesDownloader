@@ -11,7 +11,6 @@ builder.Logging.ClearProviders();
 builder.Logging.SetMinimumLevel(LogLevel.Trace);
 builder.Host.UseNLog();
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<ErrorHandlingMiddleware>();
@@ -24,11 +23,9 @@ builder.Services.AddScoped<IExchangeRatesService, ExchangeRatesService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/ExchangeRates/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 app.UseMiddleware<ErrorHandlingMiddleware>();
