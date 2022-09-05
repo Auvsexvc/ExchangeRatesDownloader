@@ -3,11 +3,11 @@ using ExchangeRatesDownloaderApp.Models;
 
 namespace ExchangeRatesDownloaderApp.Services
 {
-    public class HomeService : IHomeService
+    public class ExchangeRatesService : IExchangeRatesService
     {
         private readonly IDataProcessor _dataProcessor;
 
-        public HomeService(IDataProcessor dataProcessor)
+        public ExchangeRatesService(IDataProcessor dataProcessor)
         {
             _dataProcessor = dataProcessor;
         }

@@ -20,11 +20,11 @@ namespace ExchangeRatesDownloaderApp.Data
             if (await _appDbContext.Database.CanConnectAsync())
             {
                 data = await _appDbContext
-                .ExchangeTables
-                .Include(x => x.Rates)
-                .GroupBy(x => x.Type)
-                .Select(x => x.OrderByDescending(x => x.EffectiveDate).First())
-                .ToListAsync();
+                    .ExchangeTables
+                    .Include(x => x.Rates)
+                    .GroupBy(x => x.Type)
+                    .Select(x => x.OrderByDescending(x => x.EffectiveDate).First())
+                    .ToListAsync();
             }
 
             return data;

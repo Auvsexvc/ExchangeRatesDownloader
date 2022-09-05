@@ -4,11 +4,11 @@ using Microsoft.Data.SqlClient;
 
 namespace ExchangeRatesDownloaderApp.Controllers
 {
-    public class HomeController : Controller
+    public class ExchangeRatesController : Controller
     {
-        private readonly IHomeService _homeService;
+        private readonly IExchangeRatesService _homeService;
 
-        public HomeController(IHomeService homeService)
+        public ExchangeRatesController(IExchangeRatesService homeService)
         {
             _homeService = homeService;
         }

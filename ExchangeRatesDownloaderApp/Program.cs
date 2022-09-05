@@ -20,14 +20,14 @@ builder.Services.AddScoped<IDataProvider, DataProvider>();
 builder.Services.AddScoped<IDataWriter, DataWriter>();
 builder.Services.AddScoped<IDataReader, DataReader>();
 builder.Services.AddScoped<IDataProcessor, DataProcessor>();
-builder.Services.AddScoped<IHomeService, HomeService>();
+builder.Services.AddScoped<IExchangeRatesService, ExchangeRatesService>();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
+    app.UseExceptionHandler("/ExchangeRates/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
@@ -42,6 +42,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}");
+    pattern: "{controller=ExchangeRates}/{action=Index}");
 
 app.Run();

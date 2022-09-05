@@ -25,6 +25,6 @@ namespace ExchangeRatesDownloaderApp.Models
         public int TableId { get; set; }
 
         [ForeignKey("TableId")]
-        public ExchangeTable ExchangeTable { get; set; }
+        public ExchangeTable? ExchangeTable { get; set; }
     }
 }
