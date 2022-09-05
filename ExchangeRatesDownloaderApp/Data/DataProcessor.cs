@@ -6,14 +6,14 @@ namespace ExchangeRatesDownloaderApp.Data
     public class DataProcessor : IDataProcessor
     {
         private readonly IDataProvider _dataProvider;
-        private readonly IDataWriter _dataWriter;
-        private readonly IDataReader _dataReader;
+        private readonly IDbDataWriter _dataWriter;
+        private readonly IDbDataReader _dataReader;
         private readonly string _nbpTablesApiBaseUrl;
         private readonly string[] _nbpTablesMid;
         private readonly string[] _nbpTablesBidAsk;
         private readonly string _outputFormat;
 
-        public DataProcessor(IDataProvider dataProvider, IConfiguration configuration, IDataWriter dataWriter, IDataReader dataReader)
+        public DataProcessor(IDataProvider dataProvider, IConfiguration configuration, IDbDataWriter dataWriter, IDbDataReader dataReader)
         {
             _dataProvider = dataProvider;
             _dataWriter = dataWriter;
@@ -47,7 +47,7 @@ namespace ExchangeRatesDownloaderApp.Data
 
             List<ExchangeRateVM> results = new();
 
-            foreach (var table in data.Where(t => _nbpTablesMid.Select(x=>x.ToLower()).Contains(t.Type.ToLower())))
+            foreach (var table in data.Where(t => _nbpTablesMid.Select(x => x.ToLower()).Contains(t.Type.ToLower())))
             {
                 foreach (var rate in table.Rates)
                 {

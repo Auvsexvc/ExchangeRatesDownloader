@@ -2,7 +2,7 @@
 
 namespace ExchangeRatesDownloaderApp.Interfaces
 {
-    public interface IDataWriter
+    public interface IDbDataWriter
     {
         Task SaveToDb(IEnumerable<ExchangeTable> downloadedTables);
     }

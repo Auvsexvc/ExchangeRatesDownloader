@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExchangeRatesDownloaderApp.Data
 {
-    public class DataReader : IDataReader
+    public class DbDataReader : IDbDataReader
     {
         private readonly AppDbContext _appDbContext;
 
-        public DataReader(AppDbContext appDbContext)
+        public DbDataReader(AppDbContext appDbContext)
         {
             _appDbContext = appDbContext;
         }

@@ -17,8 +17,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<ErrorHandlingMiddleware>();
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IDataProvider, DataProvider>();
-builder.Services.AddScoped<IDataWriter, DataWriter>();
-builder.Services.AddScoped<IDataReader, DataReader>();
+builder.Services.AddScoped<IDbDataWriter, DbDataWriter>();
+builder.Services.AddScoped<IDbDataReader, DbDataReader>();
 builder.Services.AddScoped<IDataProcessor, DataProcessor>();
 builder.Services.AddScoped<IExchangeRatesService, ExchangeRatesService>();
 

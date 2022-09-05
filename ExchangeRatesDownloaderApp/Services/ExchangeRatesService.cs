@@ -19,7 +19,14 @@ namespace ExchangeRatesDownloaderApp.Services
 
         public async Task ImportExchangeRatesAsync()
         {
-            await _dataProcessor.WriteToDbAsync();
+            try
+            {
+                await _dataProcessor.WriteToDbAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

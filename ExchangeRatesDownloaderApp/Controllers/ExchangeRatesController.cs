@@ -1,4 +1,5 @@
 ﻿using ExchangeRatesDownloaderApp.Interfaces;
+using ExchangeRatesDownloaderApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 
@@ -15,22 +16,30 @@ namespace ExchangeRatesDownloaderApp.Controllers
 
         public async Task<IActionResult> Index()
         {
-            ViewBag.ApiState = "No errors found.";
-            ViewBag.DbState = "No errors found.";
+            ViewBag.WriteToDb = "Db successfully updated";
+            ViewBag.ShowData = String.Empty;
             try
             {
                 await _homeService.ImportExchangeRatesAsync();
             }
             catch (SqlException ex)
             {
-                ViewBag.DBState = $"{ex.Message} - Showing the most recent exchange rates from external API";
+                ViewBag.WriteToDb = $"Writing to db failed. - {ex.Message}";
+            }
+            catch (HttpRequestException ex)
+            {
+                ViewBag.WriteToDb = $"Writing to db failed. Reading data from remote API not possible - {ex.Message}";
+            }
+
+            var data = Enumerable.Empty<ExchangeRateVM>();
+            try
+            {
+                data = await _homeService.GetExchangeRatesAsync();
             }
             catch (Exception ex)
             {
-                ViewBag.ApiState = $"{ex.Message} - Showing the most recent exchange rates stored in database";
+                ViewBag.ShowData = $"Data cannot be shown - {ex.Message}";
             }
-
-            var data = await _homeService.GetExchangeRatesAsync();
 
             return View(data);
         }
