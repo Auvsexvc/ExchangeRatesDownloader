@@ -13,7 +13,7 @@ namespace ExchangeRatesDownloaderApp.Data
             _appDbContext = appDbContext;
         }
 
-        public async Task SaveToDb(IEnumerable<ExchangeTable> downloadedTables)
+        public async Task SaveToDbAsync(IEnumerable<ExchangeTable> downloadedTables)
         {
             var canConnectToDb = await _appDbContext.Database.CanConnectAsync();
             if (!canConnectToDb)

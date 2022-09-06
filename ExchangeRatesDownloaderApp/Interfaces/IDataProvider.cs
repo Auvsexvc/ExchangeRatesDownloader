@@ -4,6 +4,8 @@ namespace ExchangeRatesDownloaderApp.Interfaces
 {
     public interface IDataProvider
     {
-        Task<List<ExchangeTable>> DownloadDataAsync(string baseUri, string[] tables, string outputFormat);
+        Task<HttpResponseMessage> GetResponseAsync(string uri);
+
+        Task<IEnumerable<ExchangeTable>> Deserialize(IEnumerable<HttpResponseMessage> httpResponses);
     }
 }

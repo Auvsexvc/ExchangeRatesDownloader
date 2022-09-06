@@ -1,5 +1,6 @@
 ﻿using ExchangeRatesDownloaderApp.Interfaces;
 using ExchangeRatesDownloaderApp.Models;
+using System.Net;
 
 namespace ExchangeRatesDownloaderApp.Data
 {
@@ -26,7 +27,7 @@ namespace ExchangeRatesDownloaderApp.Data
 
         public async Task WriteToDbAsync(IEnumerable<ExchangeTable> exchangeTables)
         {
-            await _dataWriter.SaveToDb(exchangeTables);
+            await _dataWriter.SaveToDbAsync(exchangeTables);
         }
 
         public async Task<IEnumerable<ExchangeRateVM>> PrepareViewModelAsync()
@@ -83,7 +84,18 @@ namespace ExchangeRatesDownloaderApp.Data
 
         public async Task<IEnumerable<ExchangeTable>> GetDataAsync()
         {
-            return await _dataProvider.DownloadDataAsync(_nbpTablesApiBaseUrl, _nbpTablesMid.Concat(_nbpTablesBidAsk).ToArray(), _outputFormat);
+            List<HttpResponseMessage> httpResponses = new();
+
+            foreach (var tableType in _nbpTablesMid.Concat(_nbpTablesBidAsk).ToArray())
+            {
+                var httpResponse = await _dataProvider.GetResponseAsync(MakeUri(tableType));
+                if (httpResponse.StatusCode == HttpStatusCode.OK)
+                {
+                    httpResponses.Add(httpResponse);
+                }
+            }
+
+            return await _dataProvider.Deserialize(httpResponses);
         }
 
         private async Task<List<ExchangeTable>> ReadFromDbAsync()
@@ -94,6 +106,11 @@ namespace ExchangeRatesDownloaderApp.Data
         private async Task<List<ExchangeTable>> ReadFromProviderAsync()
         {
             return new List<ExchangeTable>(await GetDataAsync());
+        }
+
+        private string MakeUri(string tableType)
+        {
+            return _nbpTablesApiBaseUrl + tableType + "?" + _outputFormat;
         }
     }
 }

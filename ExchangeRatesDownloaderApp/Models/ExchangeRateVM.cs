@@ -54,7 +54,7 @@ namespace ExchangeRatesDownloaderApp.Models
         private static decimal TrimDecimalZeroes(decimal dec)
 {
             string number = Convert.ToString(dec);
-            if (number.Contains("."))
+            if (number.Contains('.'))
             {
                 while (number[^1..] == "0" && number.Split('.')[1].Length > 4)
                 {

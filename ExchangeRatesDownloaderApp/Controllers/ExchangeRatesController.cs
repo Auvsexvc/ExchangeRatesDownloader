@@ -31,18 +31,16 @@ namespace ExchangeRatesDownloaderApp.Controllers
                 ViewBag.WriteToDb = String.Format(ControllerMessages.MSG_DBWRITEHTTPFAIL, ex.Message);
             }
 
-            var data = Enumerable.Empty<ExchangeRateVM>();
             try
             {
-                data = await _homeService.GetExchangeRatesAsync();
-                ViewBag.ShowData = String.Empty;
+                var data = await _homeService.GetExchangeRatesAsync();
+                return View(data);
             }
             catch (Exception ex)
             {
                 ViewBag.ShowData = String.Format(ControllerMessages.MSG_GETDATAFAIL, ex.Message);
+                return View(Enumerable.Empty<ExchangeRateVM>());
             }
-
-            return View(data);
         }
     }
 }
