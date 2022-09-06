@@ -38,9 +38,10 @@ namespace ExchangeRatesDownloaderTests
         }
 
         [Test, Order(1)]
-        public async Task DatabaseShouldBeCreatedOnIfDoesNotExist()
+        public Task DatabaseShouldBeCreatedOnIfDoesNotExist()
         {
             Assert.That(_dbContext.Database.CanConnect(), Is.True);
+            return Task.CompletedTask;
         }
 
         [Test, Order(2)]
