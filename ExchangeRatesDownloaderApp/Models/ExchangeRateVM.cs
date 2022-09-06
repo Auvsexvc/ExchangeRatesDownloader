@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace ExchangeRatesDownloaderApp.Models
 {
@@ -52,7 +51,7 @@ namespace ExchangeRatesDownloaderApp.Models
         }
 
         private static decimal TrimDecimalZeroes(decimal dec)
-{
+        {
             string number = Convert.ToString(dec);
             if (number.Contains('.'))
             {

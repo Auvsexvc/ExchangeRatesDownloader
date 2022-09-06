@@ -21,7 +21,7 @@ namespace ExchangeRatesDownloaderApp.Data
             foreach (var response in httpResponses)
             {
                 var content = await response.Content.ReadAsStringAsync();
-                exchangeTables.Add(await Task.Run(() => JsonConvert.DeserializeObject<List<ExchangeTable>>(content)[0]));
+                exchangeTables.Add(await Task.Run(() => JsonConvert.DeserializeObject<List<ExchangeTable>>(content)![0]));
             }
 
             return exchangeTables;
