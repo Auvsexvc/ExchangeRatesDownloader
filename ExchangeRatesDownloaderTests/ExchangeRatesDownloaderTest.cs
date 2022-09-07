@@ -48,9 +48,12 @@ namespace ExchangeRatesDownloaderTests
         {
             var actionResult = await _controller.Index() as ViewResult;
             Assert.That(actionResult, Is.TypeOf<ViewResult>());
-            Assert.IsNotNull(actionResult);
-            Assert.IsNotNull(actionResult.Model);
-            Assert.IsTrue(string.IsNullOrEmpty(actionResult.ViewName) || actionResult.ViewName == "Index");
+            Assert.That(actionResult, Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(actionResult.Model, Is.Not.Null);
+                Assert.That(string.IsNullOrEmpty(actionResult.ViewName) || actionResult.ViewName == "Index", Is.True);
+            });
             var data = (List<ExchangeRateVM>?)actionResult.ViewData.Model;
             Assert.That(data, Has.Count.EqualTo(150));
         }
