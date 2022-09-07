@@ -57,15 +57,15 @@ namespace ExchangeRatesDownloaderApp.Data
             return await _dataProvider.DeserializeAsync(httpResponses);
         }
 
-        private IEnumerable<ExchangeRateVM> PrepareViewModel(IEnumerable<ExchangeTable> data)
+        private IEnumerable<ExchangeRateVM> PrepareViewModel(IEnumerable<ExchangeTable> exchangeTables)
         {
-            var bidAskTables = data
+            var bidAskTables = exchangeTables
                 .Where(t => _nbpTablesBidAsk
                     .Select(x => x.ToLower())
                     .Contains(t.Type.ToLower()))
                 .ToList();
 
-            var midTables = data
+            var midTables = exchangeTables
                 .Where(t => _nbpTablesMid
                     .Select(x => x.ToLower())
                     .Contains(t.Type.ToLower()));
