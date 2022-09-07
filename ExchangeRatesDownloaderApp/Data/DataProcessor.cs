@@ -30,59 +30,17 @@ namespace ExchangeRatesDownloaderApp.Data
             await _dataWriter.SaveToDbAsync(exchangeTables);
         }
 
-        public async Task<IEnumerable<ExchangeRateVM>> PrepareViewModelAsync()
+        public async Task<IEnumerable<ExchangeRateVM>> GetViewDataFromAvailableSourceAsync()
         {
-            List<ExchangeTable> data;
-
-            if (await _dataReader.CanConnectToDb())
+            if (await _dataReader.CanConnectToDbAsync())
             {
-                data = await ReadFromDbAsync();
-            }
-            else
-            {
-                data = await ReadFromProviderAsync();
+                return PrepareViewModel(await ReadFromDbAsync());
             }
 
-            var objC = data.Where(t => _nbpTablesBidAsk.Select(x => x.ToLower()).Contains(t.Type.ToLower())).ToList();
-
-            List<ExchangeRateVM> results = new();
-
-            foreach (var table in data.Where(t => _nbpTablesMid.Select(x => x.ToLower()).Contains(t.Type.ToLower())))
-            {
-                foreach (var rate in table.Rates)
-                {
-                    var isCurrencyHavingBidAsk = false;
-                    var idx = 0;
-                    for (int i = 0; i < objC.Count; i++)
-                    {
-                        isCurrencyHavingBidAsk = objC[i].Rates.Any(r => r.Code == rate.Code);
-                        if (isCurrencyHavingBidAsk)
-                        {
-                            idx = i;
-                            break;
-                        }
-                    }
-
-                    ExchangeRateVM exchangeRate = new()
-                    {
-                        Name = rate.Name,
-                        Code = rate.Code,
-                        Bid = isCurrencyHavingBidAsk ? objC[idx].Rates.Where(r => r.Code == rate.Code).Select(r => r.Bid).First() : rate.Bid,
-                        Ask = isCurrencyHavingBidAsk ? objC[idx].Rates.Where(r => r.Code == rate.Code).Select(r => r.Ask).First() : rate.Ask,
-                        Mid = rate.Mid,
-                        No = isCurrencyHavingBidAsk ? String.Join("\n", table.No, objC[idx].No) : table.No,
-                        Type = isCurrencyHavingBidAsk ? String.Join("\n", table.Type, objC[idx].Type) : table.Type,
-                        TradingDate = isCurrencyHavingBidAsk ? objC[idx].TradingDate : table.TradingDate,
-                        EffectiveDate = table.EffectiveDate,
-                        EffectiveDateBidAsk = isCurrencyHavingBidAsk ? objC[idx].EffectiveDate : null
-                    };
-                    results.Add(exchangeRate);
-                }
-            }
-            return results;
+            return PrepareViewModel(await ReadFromProviderAsync());
         }
 
-        public async Task<IEnumerable<ExchangeTable>> GetDataAsync()
+        public async Task<IEnumerable<ExchangeTable>> GetDataFromProviderAsync()
         {
             List<HttpResponseMessage> httpResponses = new();
 
@@ -95,22 +53,48 @@ namespace ExchangeRatesDownloaderApp.Data
                 }
             }
 
-            return await _dataProvider.Deserialize(httpResponses);
+            return await _dataProvider.DeserializeAsync(httpResponses);
         }
 
-        private async Task<List<ExchangeTable>> ReadFromDbAsync()
+        private IEnumerable<ExchangeRateVM> PrepareViewModel(IEnumerable<ExchangeTable> data)
         {
-            return await _dataReader.GetAllRatesAsync();
+            var objC = data.Where(t => _nbpTablesBidAsk.Select(x => x.ToLower()).Contains(t.Type.ToLower())).ToList();
+
+            List<ExchangeRateVM> exchangeRates = new();
+
+            foreach (var table in data.Where(t => _nbpTablesMid.Select(x => x.ToLower()).Contains(t.Type.ToLower())))
+            {
+                foreach (var rate in table.Rates)
+                {
+                    (int index, bool hasBidAsk) = Enumerable
+                        .Range(0, objC.Count)
+                        .Select(x => (x, hasBidAsk: objC[x].Rates.Any(r => r.Code == rate.Code)))
+                        .FirstOrDefault(x => x.hasBidAsk);
+
+                    ExchangeRateVM exchangeRate = new()
+                    {
+                        Name = rate.Name,
+                        Code = rate.Code,
+                        Bid = hasBidAsk ? objC[index].Rates.Where(r => r.Code == rate.Code).Select(r => r.Bid).First() : rate.Bid,
+                        Ask = hasBidAsk ? objC[index].Rates.Where(r => r.Code == rate.Code).Select(r => r.Ask).First() : rate.Ask,
+                        Mid = rate.Mid,
+                        No = hasBidAsk ? String.Join("\n", table.No, objC[index].No) : table.No,
+                        Type = hasBidAsk ? String.Join("\n", table.Type, objC[index].Type) : table.Type,
+                        TradingDate = hasBidAsk ? objC[index].TradingDate : table.TradingDate,
+                        EffectiveDate = table.EffectiveDate,
+                        EffectiveDateBidAsk = hasBidAsk ? objC[index].EffectiveDate : null
+                    };
+                    exchangeRates.Add(exchangeRate);
+                }
+            }
+
+            return exchangeRates;
         }
 
-        private async Task<List<ExchangeTable>> ReadFromProviderAsync()
-        {
-            return new List<ExchangeTable>(await GetDataAsync());
-        }
+        private async Task<IEnumerable<ExchangeTable>> ReadFromDbAsync() => await _dataReader.GetAllRatesAsync();
 
-        private string MakeUri(string tableType)
-        {
-            return _nbpTablesApiBaseUrl + tableType + "?" + _outputFormat;
-        }
+        private async Task<IEnumerable<ExchangeTable>> ReadFromProviderAsync() => await GetDataFromProviderAsync();
+
+        private string MakeUri(string tableType) => _nbpTablesApiBaseUrl + tableType + "?" + _outputFormat;
     }
 }

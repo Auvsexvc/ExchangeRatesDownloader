@@ -14,7 +14,7 @@ namespace ExchangeRatesDownloaderApp.Data
             return response;
         }
 
-        public async Task<IEnumerable<ExchangeTable>> Deserialize(IEnumerable<HttpResponseMessage> httpResponses)
+        public async Task<IEnumerable<ExchangeTable>> DeserializeAsync(IEnumerable<HttpResponseMessage> httpResponses)
         {
             var exchangeTables = new List<ExchangeTable>();
 

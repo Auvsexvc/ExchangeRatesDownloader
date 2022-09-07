@@ -30,9 +30,6 @@ namespace ExchangeRatesDownloaderApp.Data
             return data;
         }
 
-        public async Task<bool> CanConnectToDb()
-        {
-            return await _appDbContext.Database.CanConnectAsync();
-        }
+        public async Task<bool> CanConnectToDbAsync() => await _appDbContext.Database.CanConnectAsync();
     }
 }

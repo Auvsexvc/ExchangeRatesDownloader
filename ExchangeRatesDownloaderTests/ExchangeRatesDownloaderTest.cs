@@ -38,10 +38,9 @@ namespace ExchangeRatesDownloaderTests
         }
 
         [Test, Order(1)]
-        public Task DatabaseShouldBeCreatedOnIfDoesNotExist()
+        public void DatabaseShouldBeCreatedOnIfDoesNotExist()
         {
             Assert.That(_dbContext.Database.CanConnect(), Is.True);
-            return Task.CompletedTask;
         }
 
         [Test, Order(2)]
@@ -52,14 +51,14 @@ namespace ExchangeRatesDownloaderTests
             Assert.IsNotNull(actionResult);
             Assert.IsNotNull(actionResult.Model);
             Assert.IsTrue(string.IsNullOrEmpty(actionResult.ViewName) || actionResult.ViewName == "Index");
-            var data = (List<ExchangeRateVM>)actionResult.ViewData.Model;
+            var data = (List<ExchangeRateVM>?)actionResult.ViewData.Model;
             Assert.That(data, Has.Count.EqualTo(150));
         }
 
         [Test, Order(3)]
         public async Task ShouldBe3ExchangeTablesWrittenToDataBase()
         {
-            var data = await _dataProcessor.GetDataAsync();
+            var data = await _dataProcessor.GetDataFromProviderAsync();
             await _dataWriter.SaveToDbAsync(data);
             var result = await _dataReader.GetAllRatesAsync();
             Assert.That(result, Has.Count.EqualTo(3));
@@ -68,7 +67,7 @@ namespace ExchangeRatesDownloaderTests
         [Test, Order(4)]
         public async Task ShouldBe163RatesTotalWrittenToDataBase()
         {
-            var data = await _dataProcessor.GetDataAsync();
+            var data = await _dataProcessor.GetDataFromProviderAsync();
             await _dataWriter.SaveToDbAsync(data);
             var result = await _dataReader.GetAllRatesAsync();
             Assert.That(result.SelectMany(x => x.Rates).ToList(), Has.Count.EqualTo(163));
