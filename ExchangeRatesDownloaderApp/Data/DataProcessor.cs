@@ -1,7 +1,6 @@
 ﻿using ExchangeRatesDownloaderApp.Interfaces;
 using ExchangeRatesDownloaderApp.Models;
 using System.Net;
-using System.Linq;
 
 namespace ExchangeRatesDownloaderApp.Data
 {
