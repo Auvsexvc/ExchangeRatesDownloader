@@ -8,7 +8,7 @@ namespace ExchangeRatesDownloaderApp.Data
     {
         public async Task<HttpResponseMessage> GetResponseAsync(string uri)
         {
-            var httpClient = new HttpClient();
+            using var httpClient = new HttpClient();
             var response = await httpClient.GetAsync(uri);
 
             return response;
