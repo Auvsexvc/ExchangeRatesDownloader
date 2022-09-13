@@ -9,18 +9,18 @@ namespace ExchangeRatesDownloaderApp.Controllers
 {
     public class ExchangeRatesController : Controller
     {
-        private readonly IExchangeRatesService _homeService;
+        private readonly IExchangeRatesService _exchangeRatesService;
 
-        public ExchangeRatesController(IExchangeRatesService homeService)
+        public ExchangeRatesController(IExchangeRatesService exchangeRatesService)
         {
-            _homeService = homeService;
+            _exchangeRatesService = exchangeRatesService;
         }
 
         public async Task<IActionResult> Index()
         {
             try
             {
-                await _homeService.ImportExchangeRatesAsync();
+                await _exchangeRatesService.ImportExchangeRatesAsync();
                 ViewBag.WriteToDb = ControllerMessages.MSG_GETDATASUCCESS;
             }
             catch (SqlException ex)
@@ -34,7 +34,7 @@ namespace ExchangeRatesDownloaderApp.Controllers
 
             try
             {
-                var data = await _homeService.GetExchangeRatesAsync();
+                var data = await _exchangeRatesService.GetExchangeRatesAsync();
                 return View(data);
             }
             catch (Exception ex)
