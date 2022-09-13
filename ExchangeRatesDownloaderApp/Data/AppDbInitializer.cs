@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace ExchangeRatesDownloaderApp.Data
 {
@@ -9,16 +8,22 @@ namespace ExchangeRatesDownloaderApp.Data
         {
             using var serviceScope = applicationBuilder.ApplicationServices.CreateScope();
             var _appDbContext = serviceScope.ServiceProvider.GetService<AppDbContext>();
-
-            var canConnectToDb = await _appDbContext.Database.CanConnectAsync();
-            if (!canConnectToDb)
+            var canConnectToDb = await _appDbContext!.Database.CanConnectAsync();
+            try
             {
-                var isDbReadyToWriteData = await _appDbContext.Database.EnsureCreatedAsync();
-
-                if (!isDbReadyToWriteData)
+                if (!canConnectToDb)
                 {
-                    await _appDbContext.Database.MigrateAsync();
+                    var isDbReadyToWriteData = await _appDbContext.Database.EnsureCreatedAsync();
+
+                    if (!isDbReadyToWriteData)
+                    {
+                        await _appDbContext.Database.MigrateAsync();
+                    }
                 }
+            }
+            catch (Exception)
+            {
+                await _appDbContext.DisposeAsync();
             }
         }
     }
