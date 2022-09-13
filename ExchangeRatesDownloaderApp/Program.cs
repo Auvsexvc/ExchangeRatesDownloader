@@ -41,4 +41,6 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=ExchangeRates}/{action=Index}");
 
+await AppDbInitializer.DoDatabaseMigration(app);
+
 app.Run();

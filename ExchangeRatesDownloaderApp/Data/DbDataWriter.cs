@@ -15,17 +15,6 @@ namespace ExchangeRatesDownloaderApp.Data
 
         public async Task SaveToDbAsync(IEnumerable<ExchangeTable> downloadedTables)
         {
-            var canConnectToDb = await _appDbContext.Database.CanConnectAsync();
-            if (!canConnectToDb)
-            {
-                var isDbReadyToWriteData = await _appDbContext.Database.EnsureCreatedAsync();
-
-                if (!isDbReadyToWriteData)
-                {
-                    await _appDbContext.Database.MigrateAsync();
-                }
-            }
-
             foreach (var table in downloadedTables)
             {
                 if (!_appDbContext.ExchangeTables.Any(t => t.No == table.No))
