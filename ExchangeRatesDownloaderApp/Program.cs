@@ -14,10 +14,11 @@ builder.Host.UseNLog();
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<ErrorHandlingMiddleware>();
+builder.Services.AddHostedService<StartupService>();
+builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IDataProvider, DataProvider>();
-builder.Services.AddScoped<IDbDataWriter, DbDataWriter>();
-builder.Services.AddScoped<IDbDataReader, DbDataReader>();
+builder.Services.AddScoped<IDbDataHandler, DbDataHandler>();
 builder.Services.AddScoped<IDataProcessor, DataProcessor>();
 builder.Services.AddScoped<IExchangeRatesService, ExchangeRatesService>();
 
@@ -40,7 +41,5 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=ExchangeRates}/{action=Index}");
-
-await AppDbInitializer.DoDatabaseMigration(app);
 
 app.Run();

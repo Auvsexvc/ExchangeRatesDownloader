@@ -1,71 +1,49 @@
 ﻿using ExchangeRatesDownloaderApp.Interfaces;
 using ExchangeRatesDownloaderApp.Models;
-using System.Net;
 
 namespace ExchangeRatesDownloaderApp.Data
 {
     public class DataProcessor : IDataProcessor
     {
         private readonly IDataProvider _dataProvider;
-        private readonly IDbDataWriter _dataWriter;
-        private readonly IDbDataReader _dataReader;
-        private readonly string _nbpTablesApiBaseUrl;
-        private readonly string[] _nbpTablesMid;
-        private readonly string[] _nbpTablesBidAsk;
-        private readonly string _outputFormat;
+        private readonly IDbDataHandler _dataHandler;
 
-        public DataProcessor(IDataProvider dataProvider, IConfiguration configuration, IDbDataWriter dataWriter, IDbDataReader dataReader)
+        public DataProcessor(IDataProvider dataProvider, IDbDataHandler dataHandler)
         {
             _dataProvider = dataProvider;
-            _dataWriter = dataWriter;
-            _dataReader = dataReader;
-            _nbpTablesApiBaseUrl = configuration["NbpApi:TablesBaseUrl"];
-            _nbpTablesMid = configuration.GetSection("NbpApi:Tables:Mid").Get<string[]>();
-            _nbpTablesBidAsk = configuration.GetSection("NbpApi:Tables:BidAsk").Get<string[]>();
-            _outputFormat = configuration["NbpApi:OutputFormat"];
+            _dataHandler = dataHandler;
         }
 
-        public async Task WriteToDbAsync(IEnumerable<ExchangeTable> exchangeTables)
+        public async Task<IEnumerable<ExchangeRateVM>> GetRates()
         {
-            await _dataWriter.SaveToDbAsync(exchangeTables);
-        }
-
-        public async Task<IEnumerable<ExchangeRateVM>> GetViewDataFromAvailableSourceAsync()
-        {
-            if (await _dataReader.CanConnectToDbAsync())
+            if (await _dataHandler.CanConnectToDbAsync())
             {
-                return PrepareViewModel(await ReadFromDbAsync());
+                return PrepareViewModel(await _dataHandler.GetTablesAsync());
             }
 
-            return PrepareViewModel(await ReadFromProviderAsync());
+            return PrepareViewModel(await _dataProvider.GetTablesAsync());
         }
 
-        public async Task<IEnumerable<ExchangeTable>> GetDataFromProviderAsync()
+        public async Task ImportExchangeRatesAsync()
         {
-            List<HttpResponseMessage> httpResponses = new();
+            var exchangeTables = await _dataProvider.GetTablesAsync();
 
-            foreach (var tableType in _nbpTablesMid.Concat(_nbpTablesBidAsk).ToArray())
+            foreach (var exchangeTable in exchangeTables)
             {
-                var httpResponse = await _dataProvider.GetResponseAsync(MakeUri(tableType));
-                if (httpResponse.StatusCode == HttpStatusCode.OK)
-                {
-                    httpResponses.Add(httpResponse);
-                }
+                await _dataHandler.SaveTableWithRatesToDbAsync(exchangeTable);
             }
-
-            return await _dataProvider.DeserializeAsync(httpResponses);
         }
 
-        private IEnumerable<ExchangeRateVM> PrepareViewModel(IEnumerable<ExchangeTable> exchangeTables)
+        private IEnumerable<ExchangeRateVM> PrepareViewModel(IEnumerable<ExchangeTableDto> exchangeTables)
         {
             var bidAskTables = exchangeTables
-                .Where(t => _nbpTablesBidAsk
+                .Where(t => _dataProvider.NbpTablesBidAsk
                     .Select(x => x.ToLower())
                     .Contains(t.Type.ToLower()))
                 .ToList();
 
             var midTables = exchangeTables
-                .Where(t => _nbpTablesMid
+                .Where(t => _dataProvider.NbpTablesMid
                     .Select(x => x.ToLower())
                     .Contains(t.Type.ToLower()));
 
@@ -96,11 +74,5 @@ namespace ExchangeRatesDownloaderApp.Data
 
             return exchangeRates;
         }
-
-        private async Task<IEnumerable<ExchangeTable>> ReadFromDbAsync() => await _dataReader.GetAllRatesAsync();
-
-        private async Task<IEnumerable<ExchangeTable>> ReadFromProviderAsync() => await GetDataFromProviderAsync();
-
-        private string MakeUri(string tableType) => _nbpTablesApiBaseUrl + tableType + "?" + _outputFormat;
     }
 }

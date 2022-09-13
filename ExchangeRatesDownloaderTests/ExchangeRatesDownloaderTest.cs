@@ -16,8 +16,8 @@ namespace ExchangeRatesDownloaderTests
             .Options;
 
         private AppDbContext _dbContext;
-        private IDbDataReader _dataReader;
-        private IDbDataWriter _dataWriter;
+        private IDbInitializer _dbInitializer;
+        private IDbDataHandler _dataHandler;
         private IDataProcessor _dataProcessor;
         private IDataProvider _dataProvider;
         private IExchangeRatesService _service;
@@ -28,19 +28,20 @@ namespace ExchangeRatesDownloaderTests
         public void Setup()
         {
             _dbContext = new AppDbContext(_dbContextOptions);
-            _dataReader = new DbDataReader(_dbContext);
-            _dataWriter = new DbDataWriter(_dbContext);
-            _dataProvider = new DataProvider();
+            _dbInitializer = new DbInitializer(_dbContext);
+            _dataHandler = new DbDataHandler(_dbContext);
             _configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
-            _dataProcessor = new DataProcessor(_dataProvider, _configuration, _dataWriter, _dataReader);
+            _dataProvider = new DataProvider(_configuration);
+            _dataProcessor = new DataProcessor(_dataProvider, _dataHandler);
             _service = new ExchangeRatesService(_dataProcessor);
             _controller = new ExchangeRatesController(_service);
         }
 
         [Test, Order(1)]
-        public void DatabaseShouldBeCreatedOnIfDoesNotExist()
+        public async Task DatabaseShouldBeCreatedOnIfDoesNotExist()
         {
-            Assert.That(_dbContext.Database.CanConnect(), Is.True);
+            await _dbInitializer.EnsureDbCreatedIfPossible();
+            Assert.That(await _dbContext.Database.EnsureCreatedAsync(), Is.False);
         }
 
         [Test, Order(2)]
@@ -61,19 +62,25 @@ namespace ExchangeRatesDownloaderTests
         [Test, Order(3)]
         public async Task ShouldBe3ExchangeTablesWrittenToDataBase()
         {
-            var data = await _dataProcessor.GetDataFromProviderAsync();
-            await _dataWriter.SaveToDbAsync(data);
-            var result = await _dataReader.GetAllRatesAsync();
-            Assert.That(result, Has.Count.EqualTo(3));
+            var data = await _dataProvider.GetTablesAsync();
+            foreach (var item in data)
+            {
+                await _dataHandler.SaveTableWithRatesToDbAsync(item);
+            }
+            var result = await _dataHandler.GetTablesAsync();
+            Assert.That(result.Count(), Is.EqualTo(3));
         }
 
         [Test, Order(4)]
         public async Task ShouldBe163RatesTotalWrittenToDataBase()
         {
-            var data = await _dataProcessor.GetDataFromProviderAsync();
-            await _dataWriter.SaveToDbAsync(data);
-            var result = await _dataReader.GetAllRatesAsync();
-            Assert.That(result.SelectMany(x => x.Rates).ToList(), Has.Count.EqualTo(163));
+            var data = await _dataProvider.GetTablesAsync();
+            foreach (var item in data)
+            {
+                await _dataHandler.SaveTableWithRatesToDbAsync(item);
+            }
+            var result = await _dataHandler.GetTablesAsync();
+            Assert.That(result.Sum(x => x.Rates.Count), Is.EqualTo(163));
         }
 
         [OneTimeTearDown]

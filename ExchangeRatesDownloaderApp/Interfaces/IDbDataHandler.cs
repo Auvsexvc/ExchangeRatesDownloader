@@ -2,11 +2,12 @@
 
 namespace ExchangeRatesDownloaderApp.Interfaces
 {
-    public interface IDataProvider
+    public interface IDbDataHandler
     {
-        string[] NbpTablesBidAsk { get; }
-        string[] NbpTablesMid { get; }
+        Task<bool> CanConnectToDbAsync();
 
         Task<IEnumerable<ExchangeTableDto>> GetTablesAsync();
+
+        Task SaveTableWithRatesToDbAsync(ExchangeTableDto exchangeTableDto);
     }
 }

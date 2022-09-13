@@ -1,4 +1,5 @@
-﻿using ExchangeRatesDownloaderApp.Interfaces;
+﻿using ExchangeRatesDownloaderApp.Helper;
+using ExchangeRatesDownloaderApp.Interfaces;
 using ExchangeRatesDownloaderApp.Models;
 
 namespace ExchangeRatesDownloaderApp.Services
@@ -12,15 +13,31 @@ namespace ExchangeRatesDownloaderApp.Services
             _dataProcessor = dataProcessor;
         }
 
-        public async Task<IEnumerable<ExchangeRateVM>> GetExchangeRatesAsync()
+        public async Task<(IEnumerable<ExchangeRateVM>, string, string)> GetExchangeRatesViewAsync()
         {
-            return await _dataProcessor.GetViewDataFromAvailableSourceAsync();
-        }
+            string dbMsg = string.Empty;
+            try
+            {
+                await _dataProcessor.ImportExchangeRatesAsync();
+            }
+            catch (Exception ex)
+            {
+                dbMsg = String.Format(Messages.MSG_DBWRITEFAIL, ex.Message);
+            }
 
-        public async Task ImportExchangeRatesAsync()
-        {
-            var data = await _dataProcessor.GetDataFromProviderAsync();
-            await _dataProcessor.WriteToDbAsync(data);
+            IEnumerable<ExchangeRateVM> data = Enumerable.Empty<ExchangeRateVM>();
+            string apiMsg = string.Empty;
+
+            try
+            {
+                data = await _dataProcessor.GetRates();
+            }
+            catch (Exception ex)
+            {
+                apiMsg = String.Format(Messages.MSG_GETDATAFAIL, ex.Message);
+            }
+
+            return (data, dbMsg, apiMsg);
         }
     }
 }
