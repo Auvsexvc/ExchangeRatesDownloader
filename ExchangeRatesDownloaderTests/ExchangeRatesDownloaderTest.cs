@@ -56,8 +56,9 @@ namespace ExchangeRatesDownloaderTests
                 Assert.That(actionResult.Model, Is.Not.Null);
                 Assert.That(string.IsNullOrEmpty(actionResult.ViewName) || actionResult.ViewName == "Index", Is.True);
             });
-            var data = (List<ExchangeRateVM>?)actionResult.ViewData.Model;
-            Assert.That(data, Has.Count.EqualTo(150));
+            var data = (IEnumerable<ExchangeRateVM>?)actionResult.ViewData.Model;
+            Assert.That(data, Is.Not.Null);
+            Assert.That(data.Count(), Is.EqualTo(150));
         }
 
         [Test, Order(3)]
