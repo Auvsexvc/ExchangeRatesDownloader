@@ -6,7 +6,7 @@ namespace ExchangeRatesDownloaderApp.Models
     {
         private decimal? bid;
         private decimal? ask;
-        private decimal mid;
+        private decimal? mid;
 
         [Display(Name = "Source table number(s)")]
         public string No { get; set; } = string.Empty;
@@ -44,9 +44,9 @@ namespace ExchangeRatesDownloaderApp.Models
         }
 
         [Display(Name = "Average exchange rate")]
-        public decimal Mid
+        public decimal? Mid
         {
-            get { return TrimDecimalZeroes(mid); }
+            get { return mid != null ? TrimDecimalZeroes((decimal)mid) : mid; }
             set { mid = value; }
         }
 

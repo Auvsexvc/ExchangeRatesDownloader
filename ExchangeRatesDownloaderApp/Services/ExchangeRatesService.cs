@@ -13,12 +13,12 @@ namespace ExchangeRatesDownloaderApp.Services
             _dataProcessor = dataProcessor;
         }
 
-        public async Task<(IEnumerable<ExchangeRateVM>, string, string)> GetExchangeRatesViewAsync()
+        public async Task<(IEnumerable<ExchangeRateVM>, string, string)> GetExchangeRatesAsync()
         {
             string dbMsg = string.Empty;
             try
             {
-                await _dataProcessor.ImportExchangeRatesAsync();
+                await _dataProcessor.ImportToDbAsync();
             }
             catch (Exception ex)
             {
@@ -30,7 +30,7 @@ namespace ExchangeRatesDownloaderApp.Services
 
             try
             {
-                data = await _dataProcessor.GetRates();
+                data = await _dataProcessor.GetRatesAsync();
             }
             catch (Exception ex)
             {

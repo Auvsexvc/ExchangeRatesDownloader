@@ -1,5 +1,6 @@
 using ExchangeRatesDownloaderApp.Controllers;
 using ExchangeRatesDownloaderApp.Data;
+using ExchangeRatesDownloaderApp.Extensions;
 using ExchangeRatesDownloaderApp.Interfaces;
 using ExchangeRatesDownloaderApp.Models;
 using ExchangeRatesDownloaderApp.Services;
@@ -19,7 +20,7 @@ namespace ExchangeRatesDownloaderTests
         private IDbInitializer _dbInitializer;
         private IDbDataHandler _dataHandler;
         private IDataProcessor _dataProcessor;
-        private IDataProvider _dataProvider;
+        private IExternalProvider _dataProvider;
         private IExchangeRatesService _service;
         private IConfiguration _configuration;
         private ExchangeRatesController _controller;
@@ -31,7 +32,7 @@ namespace ExchangeRatesDownloaderTests
             _dbInitializer = new DbInitializer(_dbContext);
             _dataHandler = new DbDataHandler(_dbContext);
             _configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
-            _dataProvider = new DataProvider(_configuration);
+            _dataProvider = new ExternalProvider(_configuration);
             _dataProcessor = new DataProcessor(_dataProvider, _dataHandler);
             _service = new ExchangeRatesService(_dataProcessor);
             _controller = new ExchangeRatesController(_service);
@@ -62,24 +63,24 @@ namespace ExchangeRatesDownloaderTests
         [Test, Order(3)]
         public async Task ShouldBe3ExchangeTablesWrittenToDataBase()
         {
-            var data = await _dataProvider.GetTablesAsync();
+            var data = await _dataProvider.GetDtosAsync();
             foreach (var item in data)
             {
-                await _dataHandler.SaveTableWithRatesToDbAsync(item);
+                await _dataHandler.SaveToDbAsync(item.FromDto());
             }
-            var result = await _dataHandler.GetTablesAsync();
+            var result = await _dataHandler.GetRecentAsync();
             Assert.That(result.Count(), Is.EqualTo(3));
         }
 
         [Test, Order(4)]
         public async Task ShouldBe163RatesTotalWrittenToDataBase()
         {
-            var data = await _dataProvider.GetTablesAsync();
+            var data = await _dataProvider.GetDtosAsync();
             foreach (var item in data)
             {
-                await _dataHandler.SaveTableWithRatesToDbAsync(item);
+                await _dataHandler.SaveToDbAsync(item.FromDto());
             }
-            var result = await _dataHandler.GetTablesAsync();
+            var result = await _dataHandler.GetRecentAsync();
             Assert.That(result.Sum(x => x.Rates.Count), Is.EqualTo(163));
         }
 

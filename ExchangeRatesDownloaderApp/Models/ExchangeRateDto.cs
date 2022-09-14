@@ -19,6 +19,6 @@ namespace ExchangeRatesDownloaderApp.Models
         public decimal? Ask { get; set; }
 
         [JsonProperty("mid")]
-        public decimal Mid { get; set; }
+        public decimal? Mid { get; set; }
     }
 }

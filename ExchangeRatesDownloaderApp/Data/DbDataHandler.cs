@@ -1,6 +1,5 @@
-﻿using ExchangeRatesDownloaderApp.Extensions;
+﻿using ExchangeRatesDownloaderApp.Entities;
 using ExchangeRatesDownloaderApp.Interfaces;
-using ExchangeRatesDownloaderApp.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExchangeRatesDownloaderApp.Data
@@ -14,30 +13,23 @@ namespace ExchangeRatesDownloaderApp.Data
             _appDbContext = appDbContext;
         }
 
-        public async Task<IEnumerable<ExchangeTableDto>> GetTablesAsync()
+        public async Task<IEnumerable<ExchangeTable>> GetRecentAsync()
         {
-            var data = await _appDbContext
+            return await _appDbContext
                 .ExchangeTables
                 .Include(x => x.Rates)
                 .GroupBy(x => x.Type)
-                .Select(x => x.OrderByDescending(x => x.EffectiveDate).First().ToDto())
+                .Select(x => x.OrderByDescending(x => x.EffectiveDate).First())
                 .ToListAsync();
-
-            return data;
         }
 
-        public async Task SaveTableWithRatesToDbAsync(ExchangeTableDto exchangeTableDto)
+        public async Task SaveToDbAsync(ExchangeTable exchangeTable)
         {
-            if (!_appDbContext.ExchangeTables.Any(t => t.No == exchangeTableDto.No))
-            {
-                var exchangeTable = exchangeTableDto.FromDto();
+            await _appDbContext.AddAsync(exchangeTable);
 
-                await _appDbContext.AddAsync(exchangeTable);
+            await _appDbContext.AddRangeAsync(exchangeTable.Rates);
 
-                await _appDbContext.AddRangeAsync(exchangeTable.Rates);
-
-                await _appDbContext.SaveChangesAsync();
-            }
+            await _appDbContext.SaveChangesAsync();
         }
 
         public async Task<bool> CanConnectToDbAsync()

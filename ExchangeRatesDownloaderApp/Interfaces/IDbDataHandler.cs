@@ -1,4 +1,5 @@
-﻿using ExchangeRatesDownloaderApp.Models;
+﻿using ExchangeRatesDownloaderApp.Entities;
+using ExchangeRatesDownloaderApp.Models;
 
 namespace ExchangeRatesDownloaderApp.Interfaces
 {
@@ -6,8 +7,8 @@ namespace ExchangeRatesDownloaderApp.Interfaces
     {
         Task<bool> CanConnectToDbAsync();
 
-        Task<IEnumerable<ExchangeTableDto>> GetTablesAsync();
+        Task<IEnumerable<ExchangeTable>> GetRecentAsync();
 
-        Task SaveTableWithRatesToDbAsync(ExchangeTableDto exchangeTableDto);
+        Task SaveToDbAsync(ExchangeTable exchangeTable);
     }
 }

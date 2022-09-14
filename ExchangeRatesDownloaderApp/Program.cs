@@ -17,7 +17,7 @@ builder.Services.AddScoped<ErrorHandlingMiddleware>();
 builder.Services.AddHostedService<StartupService>();
 builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddScoped<IDataProvider, DataProvider>();
+builder.Services.AddScoped<IExternalProvider, ExternalProvider>();
 builder.Services.AddScoped<IDbDataHandler, DbDataHandler>();
 builder.Services.AddScoped<IDataProcessor, DataProcessor>();
 builder.Services.AddScoped<IExchangeRatesService, ExchangeRatesService>();

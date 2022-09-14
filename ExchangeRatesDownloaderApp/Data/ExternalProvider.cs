@@ -5,37 +5,35 @@ using System.Net;
 
 namespace ExchangeRatesDownloaderApp.Data
 {
-    public class DataProvider : IDataProvider
+    public class ExternalProvider : IExternalProvider
     {
         private readonly string _nbpTablesApiBaseUrl;
         private readonly string _outputFormat;
+        private readonly string[] _nbpTablesMid;
+        private readonly string[] _nbpTablesBidAsk;
 
-        public string[] NbpTablesMid { get; }
-
-        public string[] NbpTablesBidAsk { get; }
-
-        public DataProvider(IConfiguration configuration)
+        public ExternalProvider(IConfiguration configuration)
         {
             _nbpTablesApiBaseUrl = configuration["NbpApi:TablesBaseUrl"];
             _outputFormat = configuration["NbpApi:OutputFormat"];
-            NbpTablesMid = configuration.GetSection("NbpApi:Tables:Mid").Get<string[]>();
-            NbpTablesBidAsk = configuration.GetSection("NbpApi:Tables:BidAsk").Get<string[]>();
+            _nbpTablesMid = configuration.GetSection("NbpApi:Tables:Mid").Get<string[]>();
+            _nbpTablesBidAsk = configuration.GetSection("NbpApi:Tables:BidAsk").Get<string[]>();
         }
 
-        public async Task<IEnumerable<ExchangeTableDto>> GetTablesAsync()
+        public async Task<IEnumerable<ExchangeTableDto>> GetDtosAsync()
         {
-            List<ExchangeTableDto> httpResponses = new();
+            List<ExchangeTableDto> exchangeTablesDtos = new();
 
-            foreach (var tableType in NbpTablesMid.Concat(NbpTablesBidAsk).ToArray())
+            foreach (var tableType in _nbpTablesMid.Concat(_nbpTablesBidAsk).ToArray())
             {
                 var httpResponse = await GetRemoteDataAsync(MakeUri(tableType));
                 if (httpResponse.StatusCode == HttpStatusCode.OK)
                 {
-                    httpResponses.Add(await DeserializeAsync(httpResponse));
+                    exchangeTablesDtos.Add(await DeserializeAsync(httpResponse));
                 }
             }
 
-            return httpResponses;
+            return exchangeTablesDtos;
         }
 
         private static async Task<HttpResponseMessage> GetRemoteDataAsync(string uri)

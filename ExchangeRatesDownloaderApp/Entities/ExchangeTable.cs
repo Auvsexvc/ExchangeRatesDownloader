@@ -1,4 +1,4 @@
-﻿namespace ExchangeRatesDownloaderApp.Models
+﻿namespace ExchangeRatesDownloaderApp.Entities
 {
     public class ExchangeTable
     {

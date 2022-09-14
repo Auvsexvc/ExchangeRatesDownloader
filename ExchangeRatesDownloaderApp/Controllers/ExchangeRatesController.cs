@@ -16,7 +16,7 @@ namespace ExchangeRatesDownloaderApp.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var data = await _exchangeRatesService.GetExchangeRatesViewAsync();
+            var data = await _exchangeRatesService.GetExchangeRatesAsync();
 
             ViewBag.WriteToDb = data.Item2;
             ViewBag.ShowData = data.Item3;

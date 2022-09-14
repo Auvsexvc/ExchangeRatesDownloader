@@ -4,6 +4,6 @@ namespace ExchangeRatesDownloaderApp.Interfaces
 {
     public interface IExchangeRatesService
     {
-        Task<(IEnumerable<ExchangeRateVM>, string, string)> GetExchangeRatesViewAsync();
+        Task<(IEnumerable<ExchangeRateVM>, string, string)> GetExchangeRatesAsync();
     }
 }

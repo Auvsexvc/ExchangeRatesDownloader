@@ -1,4 +1,4 @@
-﻿using ExchangeRatesDownloaderApp.Models;
+﻿using ExchangeRatesDownloaderApp.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExchangeRatesDownloaderApp.Data

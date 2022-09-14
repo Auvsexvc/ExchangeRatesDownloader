@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ExchangeRatesDownloaderApp.Models
+namespace ExchangeRatesDownloaderApp.Entities
 {
     public class ExchangeRate
     {
@@ -14,7 +14,7 @@ namespace ExchangeRatesDownloaderApp.Models
 
         public decimal? Ask { get; set; }
 
-        public decimal Mid { get; set; }
+        public decimal? Mid { get; set; }
 
         public int TableId { get; set; }
 

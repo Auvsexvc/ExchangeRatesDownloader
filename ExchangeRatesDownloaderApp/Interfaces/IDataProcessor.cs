@@ -4,8 +4,8 @@ namespace ExchangeRatesDownloaderApp.Interfaces
 {
     public interface IDataProcessor
     {
-        Task<IEnumerable<ExchangeRateVM>> GetRates();
+        Task<IEnumerable<ExchangeRateVM>> GetRatesAsync();
 
-        Task ImportExchangeRatesAsync();
+        Task ImportToDbAsync();
     }
 }
